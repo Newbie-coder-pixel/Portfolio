@@ -910,6 +910,44 @@ nav {
   background: var(--bg-card);
 }
 
+.project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.project-link:hover { background: var(--accent-glow); transform: translateY(-2px); }
+.project-link svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+.project-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+}
+
 @media (max-width: 600px) {
   .timeline { padding-left: 2rem; }
   .timeline-dot { left: -2rem; }
