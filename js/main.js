@@ -13,6 +13,9 @@ const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 // Nav slides down
 tl.to('#mainNav', { opacity: 1, y: 0, duration: 0.6 }, 0)
 
+  // Avatar pops in
+  .fromTo('#heroAvatar', { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.6)' }, 0.1)
+
   // Badge fades + slides up
   .to('#heroBadge', { opacity: 1, y: 0, duration: 0.6 }, 0.2)
 
