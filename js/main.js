@@ -325,17 +325,49 @@ if (submitBtn) {
   submitBtn.addEventListener('mouseleave', () => gsap.to(submitBtn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' }));
 }
 
-// Contact form → mailto
-document.getElementById('contactForm')?.addEventListener('submit', function (e) {
+// Contact form → Formspree
+document.getElementById('contactForm')?.addEventListener('submit', async function (e) {
   e.preventDefault();
-  const name = this.querySelector('#fname').value;
-  const email = this.querySelector('#femail').value;
-  const msg = this.querySelector('#fmsg').value;
-  window.location.href = `mailto:arjentinia01@gmail.com?subject=Portfolio Contact from ${encodeURIComponent(name)}&body=${encodeURIComponent(msg)}%0A%0AFrom: ${encodeURIComponent(email)}`;
+
+  const btn = document.getElementById('submitBtn');
   const ok = document.getElementById('formSuccess');
-  ok.style.display = 'flex';
-  gsap.from(ok, { opacity: 0, y: 10, duration: 0.4 });
-  this.reset();
+
+  // Loading state
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.innerHTML = 'Sending... <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+
+  const data = new FormData(this);
+
+  try {
+    const response = await fetch('https://formspree.io/f/xzdlaplp', {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (response.ok) {
+      // Success
+      ok.style.display = 'flex';
+      gsap.from(ok, { opacity: 0, y: 10, duration: 0.4 });
+      this.reset();
+      btn.innerHTML = 'Sent ✓';
+      btn.style.background = '#22c55e';
+    } else {
+      // Server error
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.background = '';
+      btn.innerHTML = 'Try again <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+      alert('Something went wrong. Please try again or email directly at arjentinia01@gmail.com');
+    }
+  } catch (err) {
+    // Network error
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.innerHTML = 'Try again <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+    alert('Network error. Please check your connection and try again.');
+  }
 });
 
 // ══════════════════════════════════════════
