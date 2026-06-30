@@ -306,7 +306,7 @@ gsap.from('.social-link', {
   x: -30, opacity: 0, duration: 0.5, stagger: 0.1, ease: 'power3.out'
 });
 
-gsap.from('.contact-form .form-group, .contact-form .btn-submit', {
+gsap.from('.contact-form .form-group', {
   scrollTrigger: { trigger: '.contact-form', start: 'top 82%' },
   y: 20, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out'
 });
@@ -325,16 +325,45 @@ if (submitBtn) {
   submitBtn.addEventListener('mouseleave', () => gsap.to(submitBtn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' }));
 }
 
+// ══════════════════════════════════════════
+// SUBMIT BUTTON — only becomes active once all required fields are filled
+// ══════════════════════════════════════════
+const contactFormEl = document.getElementById('contactForm');
+
+function checkFormReady() {
+  if (!contactFormEl || !submitBtn) return;
+  const requiredFields = contactFormEl.querySelectorAll('[required]');
+  const allFilled = Array.from(requiredFields).every(
+    field => field.value.trim() !== '' && field.checkValidity()
+  );
+  submitBtn.classList.toggle('is-ready', allFilled);
+  submitBtn.disabled = !allFilled;
+}
+
+if (contactFormEl) {
+  contactFormEl.querySelectorAll('[required]').forEach(field => {
+    field.addEventListener('input', checkFormReady);
+    field.addEventListener('blur', checkFormReady);
+  });
+  checkFormReady(); // covers browser autofill on load
+}
+
 // Contact form → Formspree
-document.getElementById('contactForm')?.addEventListener('submit', async function (e) {
+contactFormEl?.addEventListener('submit', async function (e) {
   e.preventDefault();
 
-  const btn = document.getElementById('submitBtn');
+  if (!this.checkValidity()) {
+    this.reportValidity();
+    return;
+  }
+
+  const btn = submitBtn;
   const ok = document.getElementById('formSuccess');
+  const formEl = this;
 
   // Loading state
   btn.disabled = true;
-  btn.style.opacity = '0.6';
+  btn.classList.add('is-sending');
   btn.innerHTML = 'Sending... <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
 
   const data = new FormData(this);
@@ -350,22 +379,28 @@ document.getElementById('contactForm')?.addEventListener('submit', async functio
       // Success
       ok.style.display = 'flex';
       gsap.from(ok, { opacity: 0, y: 10, duration: 0.4 });
-      this.reset();
+      btn.classList.remove('is-sending');
       btn.innerHTML = 'Sent ✓';
       btn.style.background = '#22c55e';
+
+      setTimeout(() => {
+        formEl.reset();
+        btn.style.background = '';
+        btn.innerHTML = 'Send Message <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+        checkFormReady();
+      }, 2500);
     } else {
       // Server error
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.style.background = '';
+      btn.classList.remove('is-sending');
       btn.innerHTML = 'Try again <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+      checkFormReady();
       alert('Something went wrong. Please try again or email directly at arjentinia01@gmail.com');
     }
   } catch (err) {
     // Network error
-    btn.disabled = false;
-    btn.style.opacity = '1';
+    btn.classList.remove('is-sending');
     btn.innerHTML = 'Try again <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+    checkFormReady();
     alert('Network error. Please check your connection and try again.');
   }
 });
